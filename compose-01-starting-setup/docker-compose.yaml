@@ -1,0 +1,154 @@
+version: '3.8'
+
+# docker compose up 
+#   -d to start in detached mode
+# docker compose down
+#   -v to remove volumes - this will delete the data there so be sure
+
+# services are our containers
+services:
+  
+  ########################################
+  # MONGO DB
+  ########################################
+
+  mongodb:
+    # image should be an image that we've created or one 
+    # that docker can find in the hub
+    image: 'mongo'
+
+    # if you don't set a container name then compose creates one 
+    # for us but we need the name to be specific so we can see the 
+    # server from our backend mondodb connect string
+    # I learned later that inside of the docker network it will automatically
+    # associate the service name and the container name so it should work if 
+    # you address mongodb here -or- the longer mashup thing that compose 
+    # creates for us, or to be direct do it this way...
+    container_name: mongodb_server
+
+    # attached is a default with compose
+    # start docker compose <file> -d if we want to start detatched
+    # when we compose down, it will automatically rm the container 
+    # so we don't need the --rm here either
+
+    # volumes - we can have more than one volume so we nest them
+    volumes:
+      # the format is as it is on the comment line for docker run
+      # here we have a names volume called data and we point to /data/db
+      # which is where mongo by default keeps it's database files
+      - data:/data/db
+
+    environment:
+      - MONGODB_USERNAME=sheaf
+      - MONGODB_PASSWORD=secret
+
+    # docker will automatically create a shared network for all the services 
+    # in this compose file so we don't need to create one here but we could
+    # if we needed to for some reason
+    networks:
+      - my-network 
+
+  ########################################
+  # FRONTEND
+  ########################################
+  frontend:
+
+    build: ./frontend
+    image: frontend_image
+    container_name: frontend_server
+    volumes:
+      - type: bind
+        #source: /home/scott/dev/docker_class/compose-01-starting-setup/frontend/src
+        source: ./frontend/src
+        target: /app/src
+    networks:
+      - my-network 
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend # not strictly needed since it's unlikely we use the web interface before
+                # things are up but just in case
+    
+    # we need these next two to ensure that this container is run in interactive mode
+    # since docker compose will run things in interactive mode by default but we could
+    # use the -d on it and that would break this container
+    stdin_open: true
+    tty: true
+
+  ########################################
+  # BACKEND
+  ########################################
+  backend:
+    
+    build: ./backend
+    
+    # sometimes we need to be more specific for the build command so we 
+    # can use contact and point to the dockerfile directly
+    # note that if the dockerfile has relative references inside they need
+    # to be relative to the dockerfile in the context
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     some-arg: 1
+
+    image: backend_image
+# apt install dnsutils
+    container_name: backend_server
+
+    environment:
+      - MONGODB_USERNAME=sheaf
+      - MONGODB_PASSWORD=secret 
+      # we could also use the env_file option here instead if we didn't want the
+      # plain text passwords here in the compose file
+      # env_file:
+      #  - fileName
+
+    volumes:
+
+      - type: volume
+        source: logs
+        target: /app/logs
+      
+      - type: volume
+        target: /app/node_modules
+
+      - type: bind
+        # source: /home/scott/dev/docker_class/compose-01-starting-setup/backend
+        source: ./backend
+        target: /app
+
+    networks:
+      - my-network 
+    
+    ports:
+      - "80:80"
+
+    # we want to tell docker compose that we want mongodb up and running before
+    # this guys gets launched
+    depends_on:
+      - mongodb
+
+########################################
+# GLOBAL
+########################################
+
+# for named volumes we should add a volumes key here
+# any named volumes used in our services have to be listed here
+volumes:
+
+  data: # doesn't need anything more than this syntax
+  # different containers can use the same named volume 
+  # and then they would of course be sharing it
+
+  logs:
+
+networks:
+  my-network:
+    # If you want your containers to join a pre-existing network, use the external option
+    # this is tricky because order of operations matter - since in this test 
+    # I am assuming that the "my-network" network was already created either on the command
+    # line or from the other docker run commands 
+    external: true
+
+  

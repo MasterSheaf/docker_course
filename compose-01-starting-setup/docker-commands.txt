@@ -1,0 +1,65 @@
+---------------------
+Create Network
+---------------------
+
+docker network create my-network
+
+---------------------
+Run MongoDB Container
+---------------------
+
+docker run --name mongodb_server \
+  -e MONGO_INITDB_ROOT_USERNAME=sheaf \
+  -e MONGO_INITDB_ROOT_PASSWORD=secret \
+  -v data:/data/db \
+  --rm \
+  -d \
+  --network my-network \
+  mongo
+
+---------------------
+Build Node API Image
+---------------------
+
+docker build -t backend_image .
+
+---------------------
+Run Node API Container
+---------------------
+
+docker run --name backend_server \
+  -e MONGODB_USERNAME=sheaf \
+  -e MONGODB_PASSWORD=secret \
+  -v logs:/app/logs \
+  --mount type=bind,source="$(pwd)",target=/app \
+  -v /app/node_modules \
+  --rm \
+  -d \
+  --network my-network \
+  -p 80:80 \
+  backend_image
+
+---------------------
+Build React SPA Image
+---------------------
+
+docker build -t frontend_image .
+
+---------------------
+Run React SPA Container
+---------------------
+
+docker run --name frontend_server \
+--mount type=bind,source="$(pwd)"/src,target=/app/src \
+--rm \
+-d \
+-p 3000:3000 \
+-it \
+frontend_image
+
+---------------------
+Stop all Containers
+---------------------
+
+docker stop mongodb_server backend_server frontend_server
+

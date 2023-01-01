@@ -1,0 +1,11 @@
+----------------------------------
+To login with authentication
+----------------------------------
+mongosh -u 'sheaf' -p 'secret'
+
+If you created the database with the environment variables MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD set then you'll need to do this.
+
+-----------------------------------
+Cheat sheet
+-----------------------------------
+https://www.mongodb.com/developer/products/mongodb/cheat-sheet/
