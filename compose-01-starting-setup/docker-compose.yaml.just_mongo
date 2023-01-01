@@ -39,8 +39,8 @@ services:
       - data:/data/db
 
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=sheaf
-      - MONGO_INITDB_ROOT_PASSWORD=secret
+      - MONGODB_USERNAME=sheaf
+      - MONGODB_PASSWORD=secret
 
     # docker will automatically create a shared network for all the services 
     # in this compose file so we don't need to create one here but we could
@@ -48,86 +48,6 @@ services:
     networks:
       - my-network 
 
-  ########################################
-  # FRONTEND
-  ########################################
-  frontend:
-
-    build: ./frontend
-    image: frontend_image
-    container_name: frontend_server
-    volumes:
-      - type: bind
-        #source: /home/scott/dev/docker_class/compose-01-starting-setup/frontend/src
-        source: ./frontend/src
-        target: /app/src
-    networks:
-      - my-network 
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend # not strictly needed since it's unlikely we use the web interface before
-                # things are up but just in case
-    
-    # we need these next two to ensure that this container is run in interactive mode
-    # since docker compose will run things in interactive mode by default but we could
-    # use the -d on it and that would break this container
-    stdin_open: true
-    tty: true
-
-  ########################################
-  # BACKEND
-  ########################################
-  backend:
-    
-    build: ./backend
-    
-    # sometimes we need to be more specific for the build command so we 
-    # can use contact and point to the dockerfile directly
-    # note that if the dockerfile has relative references inside they need
-    # to be relative to the dockerfile in the context
-    # build:
-    #   context: ./backend
-    #   dockerfile: Dockerfile
-    #   args:
-    #     some-arg: 1
-
-    image: backend_image
-
-    container_name: backend_server
-
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=sheaf
-      - MONGO_INITDB_ROOT_PASSWORD=secret 
-      # we could also use the env_file option here instead if we didn't want the
-      # plain text passwords here in the compose file
-      # env_file:
-      #  - fileName
-
-    volumes:
-
-      - type: volume
-        source: logs
-        target: /app/logs
-      
-      - type: volume
-        target: /app/node_modules
-
-      - type: bind
-        # source: /home/scott/dev/docker_class/compose-01-starting-setup/backend
-        source: ./backend
-        target: /app
-
-    networks:
-      - my-network 
-    
-    ports:
-      - "80:80"
-
-    # we want to tell docker compose that we want mongodb up and running before
-    # this guys gets launched
-    depends_on:
-      - mongodb
 
 ########################################
 # GLOBAL
@@ -140,8 +60,6 @@ volumes:
   data: # doesn't need anything more than this syntax
   # different containers can use the same named volume 
   # and then they would of course be sharing it
-
-  logs:
 
 networks:
   my-network:
