@@ -1,4 +1,11 @@
-version: '3.8'
+# on Ubuntu 18 (my work pc) I had to set the version here to 3.5 from 3.8 in order 
+# for the old version of docker-compose to work.  This didn't seem to break anything
+# other than I had to manually create the my-network network at the command line
+# as compose said it didn't exist so I am assuming that they didn't have network
+# support in compose back in 3.5
+
+version: '3.5'
+#verson: '3.8'
 
 # docker compose up 
 #   -d to start in detached mode
