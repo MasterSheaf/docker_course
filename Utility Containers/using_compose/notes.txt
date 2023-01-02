@@ -1,0 +1,11 @@
+To build the container by hand (no compose)...
+docker build -t ls_container .
+
+To run a test...
+docker run -it --rm ls_container --help
+...this should show the help from the ls command in the container then exits
+
+
+
+Now to do the same using docker compose
+docker-compose run --rm directory --help
