@@ -1,0 +1,6 @@
+FROM bash
+
+WORKDIR /
+
+ENTRYPOINT ["ls"]
+

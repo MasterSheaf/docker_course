@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  directory:
+    build: ./ #do this in the current working directory
+    stdin_open: true
+    tty: true
+
+    
+
+
