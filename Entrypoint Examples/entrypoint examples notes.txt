@@ -1,0 +1,53 @@
+In a dockerfile you can use the ENTRYPOINT tag 
+When doing so, this is automatically assumed appended to the end of the docker run command
+Any command line parameters at the end of the docker run command are assumed to be parameters into the entrypoint identified program
+This is different than the dockerfile CMD [ "npm", "start" ] which gets run but can be overriden by adding
+a command at the end of the docker start 
+
+Here are some examples
+
+Dockerfile 1
+-----------------------------
+FROM node:14-alpine
+WORKDIR /app
+CMD ["node", ""]
+
+Test 1
+-----------------------------
+docker build -t fast_node .
+docker run -it fast_node
+
+This command will overwrite the node CMD and run pwd and return 
+docker run -it --rm fast_node pwd
+
+This will get me to a node prompt running in the Container
+
+Test 2
+-----------------------------
+docker run -it --mount type=bind,source="$(pwd)"/app,target=/app fast_node
+
+This will add the binding to a local folder
+Not real useful here for us yet
+
+Dockerfile 2
+-----------------------------
+FROM node:14-alpine
+WORKDIR /app
+ENTRYPOINT ["NPM"]
+
+Test 3
+------------------------------
+docker build -t fast_node .
+docker run -it --rm --name fast_npm  fast_node --help
+
+This runs the conatiner, starts npm with the --help parameter and then exits
+
+Dockerfile 3
+-----------------------------
+FROM bash
+ENTRYPOINT ["<some bash command>"]
+
+You can choose any command to run as the entry point here and then you
+can put parameters on that command on the docker run like this
+
+docker run -it --rm fast_bash -ls  is like running ->>  ls -la
