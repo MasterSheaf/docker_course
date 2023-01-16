@@ -115,9 +115,9 @@ app.get('/connect', (req, res) => {
   }
 });
 
-app.listen(5150, () => {
+app.listen(5150), () => {
   console.log("Server Running on Port 5150");
-});
+};
 
 // console.log("Connecting to MongoDB");
 // console.log(`user=${process.env.MONGODB_USERNAME} password=${process.env.MONGODB_PASSWORD} url=${process.env.MONGODB_URL}`);
